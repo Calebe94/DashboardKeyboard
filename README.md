@@ -1,13 +1,12 @@
-# ESP32 Mouse/Keyboard for BLE HID
+# Dashboard Keyboard
+
 ESP32 implementation for HID over GATT Keyboard and Mouse (Bluetooth Low Energy). Including serial API for external modules (similar to Adafruit EZKey HID).
 
-### Credits and many thanks to:
-- Paul Stoffregen for the implementation of the keyboard layouts for his Teensyduino project: www.pjrc.com
-- Neil Kolban for his great contributions to the ESP32 SW (in particular the Bluetooth support): https://github.com/nkolban
-- Chegewara for help and support
- 
-and to Espressif for providing the HID implementation within the esp-idf.
+## Credits
 
+This project is hardly ispired by [ESP32 Mouse/Keyboard for BLE HID](https://github.com/asterics/esp32_mouse_keyboard). 
+
+Thank you [Asterics](https://github.com/asterics) and [Kolban](https://github.com/nkolban), I owe you a beer!
 
 # Control via stdin (make monitor)
 
@@ -24,8 +23,6 @@ keyboard when the make monitor console is running (see Espressiv IDF: https://gi
 |l  |Click left |Mouse click right |
 |r  |Click right|Mouse click left  |
 |q  |Type 'y'   |just for testing keyboard reports|
-
-
 
 # Control via 2nd UART
 
@@ -99,3 +96,20 @@ sending the mouse command again.
 |0x18/24| Serbian (Latin only)|
 
 Setting a keyboard locale is done with the "KL" command. Changes taking effect after a restart of the ESP32. This is necessary for initializing the HID country code accordingly.
+
+# Team
+
+| <img src="https://github.com/Calebe94.png?size=200" alt="Edimar Calebe Castanho"> |
+|:---------------------------------------------------------------------------------:|
+| [Edimar Calebe Castanho (Calebe94)](https://github.com/Calebe94)   |
+
+
+# License
+
+All software is covered under [MIT License](https://opensource.org/licenses/MIT).
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.

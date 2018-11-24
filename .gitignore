@@ -1,1 +1,9 @@
-build/
+*build/*
+
+.vscode/
+
+*.old
+
+*.o
+
+*.DS_Store

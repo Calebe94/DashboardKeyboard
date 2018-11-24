@@ -3,7 +3,7 @@
 #define _CONFIG_H_
 
 #define MODULE_ID "ESP32miniBT_v0.1"
-#define GATTS_TAG "FLIPMOUSE"
+#define GATTS_TAG "ESP32_MOUSE-KEYBOARD"
 #define MAX_BT_DEVICENAME_LENGTH 40
 
 // serial port of monitor and for debugging
@@ -15,7 +15,7 @@
 #define EX_SERIAL_RXPIN      (GPIO_NUM_16)
 
 // indicator LED
-#define INDICATOR_LED_PIN    (GPIO_NUM_5)
+#define INDICATOR_LED_PIN    (GPIO_NUM_2)
 
 typedef struct joystick_data {
     uint16_t X;

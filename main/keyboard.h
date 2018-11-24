@@ -123,4 +123,3 @@ uint8_t get_hid_country_code(uint8_t locale);
 #endif
 
 #endif
- 

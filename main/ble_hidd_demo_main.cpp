@@ -46,10 +46,11 @@
 #include "driver/uart.h"
 //#include "hid_dev.h"
 #include "keyboard.h"
+#include "matrix_keyboard.h"
 
 /** demo mouse speed */
 #define MOUSE_SPEED 30
-#define MAX_CMDLEN  100
+// #define MAX_CMDLEN  100
 
 #define EXT_UART_TAG "EXT_UART"
 #define CONSOLE_UART_TAG "CONSOLE_UART"
@@ -99,20 +100,16 @@ void sendKey(uint8_t c, keyboard_action type) {
 	sendKeyCode(keycode, type);
 }
 
-
-
-
-
 #define CMDSTATE_IDLE 0
 #define CMDSTATE_GET_RAW 1
 #define CMDSTATE_GET_ASCII 2
 
-struct cmdBuf {
-    int state;
-	int expectedBytes;
-	int bufferLength;
-	uint8_t buf[MAX_CMDLEN];
-} ;
+// struct cmdBuf {
+//     int state;
+// 	int expectedBytes;
+// 	int bufferLength;
+// 	uint8_t buf[MAX_CMDLEN];
+// } ;
 
 uint8_t uppercase(uint8_t c) 
 {
@@ -422,15 +419,17 @@ void uart_parse_command (uint8_t character, struct cmdBuf * cmdBuffer)
 {
     static uint8_t keycode = 0;
     
-    switch (cmdBuffer->state) {
-		
+    switch (cmdBuffer->state) 
+    {
 		case CMDSTATE_IDLE:  
-				if (character==0xfd) {
+				if (character==0xfd) 
+                {
 					cmdBuffer->bufferLength=0;
 					cmdBuffer->expectedBytes=8;   // 8 bytes for raw report size
 					cmdBuffer->state=CMDSTATE_GET_RAW;
 				}
-				else if (character == '$') {
+				else if (character == '$') 
+                {
 					cmdBuffer->bufferLength=0;   // we will read an ASCII-command until CR or LF  
 					cmdBuffer->state=CMDSTATE_GET_ASCII;
 				}
@@ -440,7 +439,7 @@ void uart_parse_command (uint8_t character, struct cmdBuf * cmdBuffer)
 		case CMDSTATE_GET_RAW:
 				cmdBuffer->buf[cmdBuffer->bufferLength]=character;
 				//if ((cmdBuffer->bufferLength == 1) && (character==0x00))  // we have a keyboard report: increase by 2 bytes
-				  // cmdBuffer->expectedBytes += 2;
+				// cmdBuffer->expectedBytes += 2;
 
 				cmdBuffer->bufferLength++;
 				cmdBuffer->expectedBytes--;
@@ -450,7 +449,11 @@ void uart_parse_command (uint8_t character, struct cmdBuf * cmdBuffer)
 						if(HID_kbdmousejoystick_rawKeyboard(cmdBuffer->buf,8) != ESP_OK)
 						{
 							ESP_LOGE(EXT_UART_TAG,"Error sending raw kbd");
-						} else ESP_LOGI(EXT_UART_TAG,"Keyboard sent");
+						} 
+                        else
+                        {
+                            ESP_LOGI(EXT_UART_TAG,"Keyboard sent");
+                        } 
 					} else if (cmdBuffer->buf[1] == 0x03) {  // mouse report
 						// TBD: synchonize with semaphore!	
 						if(HID_kbdmousejoystick_rawMouse(&(cmdBuffer->buf[2]),4) != ESP_OK)
@@ -465,28 +468,34 @@ void uart_parse_command (uint8_t character, struct cmdBuf * cmdBuffer)
 				break;
 				
 		case CMDSTATE_GET_ASCII:
-				if (character=='$')  {   //  key '$' can be created by sending "$$" 
+				if (character=='$')  
+                {   //  key '$' can be created by sending "$$" 
 					sendKey('$', PRESS_RELEASE);
 					cmdBuffer->state=CMDSTATE_IDLE;
-				} else {   // collect a command string until CR or LF are received
-					if ((character==0x0d) || (character==0x0a))  {
+				} 
+                else 
+                {   // collect a command string until CR or LF are received
+					if ((character==0x0d) || (character==0x0a))  
+                    {
 						cmdBuffer->buf[cmdBuffer->bufferLength]=0;
 						ESP_LOGI(EXT_UART_TAG,"sending command to parser: %s",cmdBuffer->buf);
 
 						processCommand(cmdBuffer);
 						cmdBuffer->state=CMDSTATE_IDLE;
-					} else {
+					}
+                    else
+                    {
 						if (cmdBuffer->bufferLength < MAX_CMDLEN-1) 
-						  cmdBuffer->buf[cmdBuffer->bufferLength++]=character;
+                        {
+                            cmdBuffer->buf[cmdBuffer->bufferLength++]=character;
+                        }
 					}
 				}
 				break;
 		default: 
- 			cmdBuffer->state=CMDSTATE_IDLE;
+            cmdBuffer->state=CMDSTATE_IDLE;
 	}
-} 
-					
-
+}
 
 void uart_console(void *pvParameters)
 {
@@ -514,7 +523,8 @@ void uart_console(void *pvParameters)
 				ESP_LOGE(CONSOLE_UART_TAG,"queues not initialized");
 				continue;
 			}
-			switch (character){
+			switch (character)
+            {
 				case 'a':
 					mouseCmd.x = -MOUSE_SPEED;
 					mouseCmd.y = 0;
@@ -637,12 +647,19 @@ void blink_task(void *pvParameter)
     gpio_set_direction(INDICATOR_LED_PIN, GPIO_MODE_OUTPUT);
     int blinkTime;
     
+    // TODO: Teste com o Teclado HID
+    struct cmdBuf cmdBuffer;
+    cmdBuffer.state=CMDSTATE_IDLE;
+    
     while(1) {
 		
 		if (HID_kbdmousejoystick_isConnected()) 
 			blinkTime=1000;
 		else blinkTime=250;
 		
+    
+        // TODO: Teste com o Teclado HID
+        // uart_parse_command('a', &cmdBuffer); // Esta função manda um caractere via HID keyboard BLE
 		
         /* Blink off (output low) */
         gpio_set_level(INDICATOR_LED_PIN, 0);
@@ -698,11 +715,10 @@ extern "C" void app_main()
     
     esp_log_level_set("*", ESP_LOG_INFO); 
 
-  
     // now start the tasks for processing UART input and indicator LED  
- 
+
     xTaskCreate(&uart_console,  "console", 4096, NULL, configMAX_PRIORITIES, NULL);
     xTaskCreate(&uart_external, "external", 4096, NULL, configMAX_PRIORITIES, NULL);
     xTaskCreate(&blink_task, "blink", 4096, NULL, configMAX_PRIORITIES, NULL);
-    
+    xTaskCreate(&keyboard_event, "keyboard_event", 4096, NULL, configMAX_PRIORITIES, NULL);
 }
